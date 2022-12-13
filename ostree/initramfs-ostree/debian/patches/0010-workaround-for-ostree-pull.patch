@@ -1,0 +1,40 @@
+From 4144c8124d74aae25b8157376862dc2cc0769b01 Mon Sep 17 00:00:00 2001
+From: jhuang0 <jhuang0@windriver.com>
+Date: Tue, 13 Dec 2022 02:57:41 -0500
+Subject: [PATCH] workaround for ostree pull
+
+It's extremely slow when ostree pull from servers virtual media,
+e.g.
+- Intel servers: remote ISO via samba
+- HP servers: virtual CD/DVD via http
+
+It takes more than 3 hours while a dirct copy takes 13 minutes,
+so the workaround here is to add a step to copy the ostree repo
+dir to local disk first, then pull the repo from local disk,
+which takes about 15 minutes.
+
+Signed-off-by: jhuang0 <jhuang0@windriver.com>
+---
+ init-ostree-install.sh | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/init-ostree-install.sh b/init-ostree-install.sh
+index 0e5b8f3..2f379e8 100644
+--- a/init-ostree-install.sh
++++ b/init-ostree-install.sh
+@@ -1329,7 +1329,11 @@ mkdir -p /var/volatile/tmp /var/volatile/run
+ lpull=""
+ if [ "$INSTL" != "" ] ; then
+ 	if [ -e /instboot${INSTL#/sysroot/boot/efi} ] ; then
+-		lpull="--url file:///instboot${INSTL#/sysroot/boot/efi}"
++		instl_name=$(basename ${INSTL#/sysroot/boot/efi})
++		cmd="cp -a /instboot/${instl_name} /"
++		lpull="--url file:///${instl_name}"
++		echo running: $cmd
++		$cmd || fatal "Error: copy ostree failed"
+ 	elif [ -e $INSTL ] ; then
+ 		lpull="--url file://$INSTL"
+ 	else
+-- 
+2.29.2
+
