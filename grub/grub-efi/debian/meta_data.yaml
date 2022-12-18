@@ -25,3 +25,4 @@ src_files:
 revision:
   dist: $STX_DIST
   PKG_GITREVCOUNT: true
+  stx_patch: 1
