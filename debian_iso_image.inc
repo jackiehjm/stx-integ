@@ -5,6 +5,7 @@ kdump-tools
 puppet
 drbd-utils
 parted
+kubectl-cert-manager
 libvirt0
 libvirt-clients
 libvirt-daemon
