@@ -2,7 +2,8 @@
 # vim: set expandtab!
 # export DH_VERBOSE = 1
 
-export CERT_MANAGER_PKG = kubectl-cert-manager-linux-amd64.tar.gz
+export DEB_HOST_ARCH = $(shell dpkg-architecture -qDEB_HOST_ARCH 2>/dev/null)
+export CERT_MANAGER_PKG = kubectl-cert-manager-linux-$(DEB_HOST_ARCH).tar.gz
 export ROOT = debian/tmp
 export SBIN_DIR = $(ROOT)/usr/sbin
 
