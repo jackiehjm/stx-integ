@@ -4,17 +4,18 @@
 export CHARTMUSEUM_VERSION = 0.13.0
 export ROOT = debian/tmp
 export BINDIR = $(ROOT)/usr/bin
+export DEB_HOST_ARCH = $(shell dpkg-architecture -qDEB_HOST_ARCH 2>/dev/null)
 
 %:
 	dh $@
 
 override_dh_auto_build:
-	tar xfz chartmuseum-v$(CHARTMUSEUM_VERSION)-linux-amd64.tar.gz
+	tar xfz chartmuseum-v$(CHARTMUSEUM_VERSION)-linux-$(DEB_HOST_ARCH).tar.gz
 
 override_dh_auto_clean:
 
 override_dh_auto_install:
 	install -d -m 755 $(BINDIR)
-	install -p -D -m 755 linux-amd64/chartmuseum $(BINDIR)/chartmuseum
+	install -p -D -m 755 linux-$(DEB_HOST_ARCH)/chartmuseum $(BINDIR)/chartmuseum
 
 override_dh_auto_test:
