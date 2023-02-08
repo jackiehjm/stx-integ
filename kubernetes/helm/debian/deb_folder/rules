@@ -7,8 +7,8 @@ export SBINDIR = $(ROOT)/usr/sbin
 export SUDOERDIR = $(ROOT)/etc/sudoers.d
 
 export HELM_VERSION = 3.2.1
-export HELM_EXECUTABLE = linux-amd64/helm
-export HELM_PKG = helm-v$(HELM_VERSION)-linux-amd64.tar.gz
+export HELM_EXECUTABLE = linux-arm64/helm
+export HELM_PKG = helm-v$(HELM_VERSION)-linux-arm64.tar.gz
 
 export HELM_2TO3_VERSION = 0.10.0
 export HELM_2TO3_PKG = helm-2to3_$(HELM_2TO3_VERSION).tar.gz

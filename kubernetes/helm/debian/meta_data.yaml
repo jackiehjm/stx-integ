@@ -3,21 +3,21 @@ debname: helm
 debver: 3.2.1-1
 src_path: centos/files
 dl_files:
-  helm-v3.2.1-linux-amd64.tar.gz:
-    topdir: linux-amd64
-    url: https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz
-    md5sum: 98764c2c0175bd306223cc985700d619
-    sha256sum: 018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+  helm-v3.2.1-linux-arm64.tar.gz:
+    topdir: linux-arm64
+    url: https://get.helm.sh/helm-v3.2.1-linux-arm64.tar.gz
+    md5sum: 73ae05cc3d2a627f51449b1365fec1c3
+    sha256sum: 7200fb4582345f521d56daed56112d667fef25c48569f574fab3f9cb04c5b176
   helm-mapkubeapis_0.3.0.tar.gz:
     topdir: mapkubeapis
-    url: https://github.com/helm/helm-mapkubeapis/releases/download/v0.3.0/helm-mapkubeapis_0.3.0_linux_amd64.tar.gz
-    md5sum: 6559501f4658af4e92e65eae0782daae
-    sha256sum: 2a3aa264b7ed2d7055528e9ae1ebc6ff253f4be6f1a899d32a05b8ca342a8d8c
+    url: https://github.com/helm/helm-mapkubeapis/releases/download/v0.3.0/helm-mapkubeapis_0.3.0_linux_arm64.tar.gz
+    md5sum: e04c9c792f598aa6cf510adb9b2ddf31
+    sha256sum: 1daf7ab7368ee033b7360383ff9ad98f9ee3387b9bc5363f9ed780d9ed2ab3a2
   helm-2to3_0.10.0.tar.gz:
     topdir: 2to3
-    url: https://github.com/helm/helm-2to3/releases/download/v0.10.0/helm-2to3_0.10.0_linux_amd64.tar.gz
-    md5sum: 64af061b463df1657e5e842df6adfbbf
-    sha256sum: 0d0f5312fef60357c8363b5dbc2995375945abb7a3c53cb3bf59dfda35ef50d3
+    url: https://github.com/helm/helm-2to3/releases/download/v0.10.0/helm-2to3_0.10.0_linux_arm64.tar.gz
+    md5sum: d22c3a7b5bafd39498bff8966b44fbea
+    sha256sum: 6080aaa9f5140d73ab4eff186ae0fcb24abbfbc2d39085759c1a55493484391b
 
 revision:
   dist: $STX_DIST
