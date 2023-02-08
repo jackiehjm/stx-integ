@@ -2,7 +2,7 @@
 # vim: set expandtab!
 # export DH_VERBOSE = 1
 
-export CERT_MANAGER_PKG = kubectl-cert-manager-linux-amd64.tar.gz
+export CERT_MANAGER_PKG = kubectl-cert-manager-linux-arm64.tar.gz
 export ROOT = debian/tmp
 export SBIN_DIR = $(ROOT)/usr/sbin
 
