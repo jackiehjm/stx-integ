@@ -11,6 +11,15 @@ dl_files:
     topdir: mapkubeapis
     url: https://github.com/helm/helm-mapkubeapis/releases/download/v0.3.2/helm-mapkubeapis_0.3.2_linux_amd64.tar.gz
     sha256sum: fdc017a5e95921967b670114723437f2d757c718f8324832b3d4bd7787f17e98
+dl_files_arm64:
+  helm-v3.9.4-linux-arm64.tar.gz:
+    topdir: linux-arm64
+    url: https://get.helm.sh/helm-v3.9.4-linux-arm64.tar.gz
+    sha256sum: d24163e466f7884c55079d1050968e80a05b633830047116cdfd8ae28d35b0c0
+  helm-mapkubeapis_0.3.2.tar.gz:
+    topdir: mapkubeapis
+    url: https://github.com/helm/helm-mapkubeapis/releases/download/v0.3.2/helm-mapkubeapis_0.3.2_linux_arm64.tar.gz
+    sha256sum: db2b0701b9bd550ab4bd7904e0f115352ebb4980d794c63f572200f3bdf29e85
 
 revision:
   dist: $STX_DIST
