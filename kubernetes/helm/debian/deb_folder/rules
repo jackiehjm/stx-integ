@@ -6,12 +6,13 @@ export ROOT = debian/tmp
 export SBINDIR = $(ROOT)/usr/sbin
 export SUDOERDIR = $(ROOT)/etc/sudoers.d
 
+export DEB_HOST_ARCH = $(shell dpkg-architecture -qDEB_HOST_ARCH 2>/dev/null)
 export HELM_VERSION = 3.12.2
-export HELM_EXECUTABLE = linux-amd64/helm
-export HELM_PKG = helm-v$(HELM_VERSION)-linux-amd64.tar.gz
+export HELM_EXECUTABLE = linux-$(DEB_HOST_ARCH)/helm
+export HELM_PKG = helm-v$(HELM_VERSION)-linux-$(DEB_HOST_ARCH).tar.gz
 
 export HELM_MAPKUBEAPIS_VERSION =  0.4.1
-export HELM_MAPKUBEAPIS_PKG = helm-mapkubeapis_$(HELM_MAPKUBEAPIS_VERSION)_linux_amd64.tar.gz
+export HELM_MAPKUBEAPIS_PKG = helm-mapkubeapis_$(HELM_MAPKUBEAPIS_VERSION)_linux_$(DEB_HOST_ARCH).tar.gz
 
 %:
 	dh $@
