@@ -51,6 +51,12 @@ override_dh_install:
 	mkdir -p ${DEBIAN_DESTDIR}/run
 	install -v -d -m 0755 ${DEBIAN_DESTDIR}/run/${_k8s_name}/
 
+    # install k8s plugin and cni directories
+	# These are for upgrading from 21.12 to 22.12
+	install -v -d -m 0755 ${DEBIAN_DESTDIR}/usr/libexec
+	install -v -d -m 0755 ${DEBIAN_DESTDIR}/usr/libexec/cni
+	install -v -d -m 0755 ${DEBIAN_DESTDIR}/usr/libexec/kubernetes
+	install -v -d -m 0755 ${DEBIAN_DESTDIR}/usr/libexec/kubernetes/kubelet-plugins
 	# install service files
 	install -v -d -m 0755 ${DEBIAN_DESTDIR}/usr/lib/systemd/system
 	install -v -m 0644 -t ${DEBIAN_DESTDIR}/usr/lib/systemd/system contrib/init/systemd/kubelet.service
