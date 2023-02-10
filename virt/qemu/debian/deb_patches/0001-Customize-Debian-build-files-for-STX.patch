@@ -1,4 +1,4 @@
-From 33716964e8381628d575160b6a015a3f8ba68640 Mon Sep 17 00:00:00 2001
+From 81c90d07b03a52f8e51e90ac6becc21994df60b4 Mon Sep 17 00:00:00 2001
 From: Thales Elero Cervi <thaleselero.cervi@windriver.com>
 Date: Fri, 18 Nov 2022 16:59:35 -0300
 Subject: [PATCH] Customize Debian build files for STX
@@ -24,12 +24,12 @@ Removed packages:
 
 Signed-off-by: Thales Elero Cervi <thaleselero.cervi@windriver.com>
 ---
- debian/control | 215 +++----------------------------------------------
- debian/rules   |  80 +-----------------
- 2 files changed, 14 insertions(+), 281 deletions(-)
+ debian/control | 194 +++----------------------------------------------
+ debian/rules   |  80 +-------------------
+ 2 files changed, 16 insertions(+), 258 deletions(-)
 
 diff --git a/debian/control b/debian/control
-index 6534765..7cc0fb4 100644
+index 6534765..626fb8b 100644
 --- a/debian/control
 +++ b/debian/control
 @@ -21,14 +21,10 @@ Build-Depends: debhelper-compat (= 12),
@@ -68,7 +68,8 @@ index 6534765..7cc0fb4 100644
 +# gcc-s390x-linux-gnu,
  # libc6.1-dev-alpha-cross isn't really needed but the code,
  # for whatever reason, #include's string.h which needs libc6.1-dev
-  gcc-alpha-linux-gnu, libc6.1-dev-alpha-cross,
+- gcc-alpha-linux-gnu, libc6.1-dev-alpha-cross,
++# gcc-alpha-linux-gnu, libc6.1-dev-alpha-cross,
  # skiboot firmware, openbios
 - gcc-powerpc64-linux-gnu,
 +# gcc-powerpc64-linux-gnu,
@@ -84,7 +85,7 @@ index 6534765..7cc0fb4 100644
  Build-Conflicts: oss4-dev
  Standards-Version: 4.5.1
  Homepage: http://www.qemu.org/
-@@ -218,141 +214,12 @@ Description: QEMU full system emulation binaries (common files)
+@@ -218,46 +214,11 @@ Description: QEMU full system emulation binaries (common files)
   This package provides common files needed for target-specific
   full system emulation (qemu-system-*) packages.
  
@@ -123,31 +124,19 @@ index 6534765..7cc0fb4 100644
 - code.  It can also be used to provide virtual hosting of several virtual
 - machines on a single server.
 -
--Package: qemu-system-arm
--Architecture: amd64 arm arm64 armel armhf i386 ia64 kfreebsd-amd64 kfreebsd-i386 mips mipsel mips64 mips64el powerpc powerpcspe ppc64 ppc64el riscv64 s390x sparc sparc64 x32
--Multi-Arch: foreign
--Depends: ${shlibs:Depends}, ${misc:Depends}, qemu-system-common (>> ${source:Version}~), qemu-system-data (>> ${source:Version}~),
+ Package: qemu-system-arm
+ Architecture: amd64 arm arm64 armel armhf i386 ia64 kfreebsd-amd64 kfreebsd-i386 mips mipsel mips64 mips64el powerpc powerpcspe ppc64 ppc64el riscv64 s390x sparc sparc64 x32
+ Multi-Arch: foreign
+ Depends: ${shlibs:Depends}, ${misc:Depends}, qemu-system-common (>> ${source:Version}~), qemu-system-data (>> ${source:Version}~),
 -Recommends: qemu-system-gui (= ${binary:Version}), qemu-utils,
--# aarch64 arm uses bootroms
-- ipxe-qemu (>= 1.0.0+git-20131111.c3d1e78-1~),
-- qemu-efi-aarch64, qemu-efi-arm
--Suggests: samba, vde2, qemu-block-extra (= ${binary:Version}),
--Provides: qemu-kvm [linux-arm64 linux-armhf linux-armel], ${sysprovides:arm}
--Breaks:   qemu-kvm [linux-arm64 linux-armhf linux-armel]
--Replaces: qemu-kvm [linux-arm64 linux-armhf linux-armel]
--Description: QEMU full system emulation binaries (arm)
-- QEMU is a fast processor emulator: currently the package supports
-- ARM emulation. By using dynamic translation it achieves
-- reasonable speed while being easy to port on new host CPUs.
-- .
-- This package provides the full system emulation binaries to emulate
-- the following arm hardware: ${sysarch:arm}.
-- .
-- In system emulation mode QEMU emulates a full system, including a processor
-- and various peripherals.  It enables easier testing and debugging of system
-- code.  It can also be used to provide virtual hosting of several virtual
-- machines on a single server.
--
++Recommends: qemu-utils,
+ # aarch64 arm uses bootroms
+  ipxe-qemu (>= 1.0.0+git-20131111.c3d1e78-1~),
+  qemu-efi-aarch64, qemu-efi-arm
+@@ -278,81 +239,12 @@ Description: QEMU full system emulation binaries (arm)
+  code.  It can also be used to provide virtual hosting of several virtual
+  machines on a single server.
+ 
 -Package: qemu-system-mips
 -Architecture: amd64 arm arm64 armel armhf i386 ia64 kfreebsd-amd64 kfreebsd-i386 mips mipsel mips64 mips64el powerpc powerpcspe ppc64 ppc64el riscv64 s390x sparc sparc64 x32
 -Multi-Arch: foreign
@@ -227,7 +216,7 @@ index 6534765..7cc0fb4 100644
  Suggests: samba, vde2, qemu-block-extra (= ${binary:Version}),
   sgabios,
  Provides: qemu-kvm [linux-amd64 linux-i386], ${sysprovides:x86}
-@@ -374,68 +241,6 @@ Description: QEMU full system emulation binaries (x86)
+@@ -374,68 +266,6 @@ Description: QEMU full system emulation binaries (x86)
   On x86 host hardware this package also enables KVM kernel virtual machine
   usage on systems which supports it.
  
@@ -297,7 +286,7 @@ index 6534765..7cc0fb4 100644
  Architecture: amd64 arm arm64 armel armhf hppa i386 ia64 kfreebsd-amd64 kfreebsd-i386 mips mipsel mips64 mips64el powerpc powerpcspe ppc64 ppc64el riscv64 s390x sparc sparc64 x32
  Multi-Arch: foreign
 diff --git a/debian/rules b/debian/rules
-index 9d9f18f..d6778c3 100755
+index 9d9f18f..dfe24b5 100755
 --- a/debian/rules
 +++ b/debian/rules
 @@ -72,14 +72,11 @@ endif
@@ -308,12 +297,12 @@ index 9d9f18f..d6778c3 100755
 - i386 x86_64 alpha aarch64 arm avr cris hppa m68k microblaze microblazeel \
 - mips mipsel mips64 mips64el moxie nios2 or1k ppc ppc64 riscv32 riscv64 rx \
 - sh4 sh4eb sparc sparc64 s390x tricore xtensa xtensaeb
-+system_targets = i386 x86_64
++system_targets = i386 x86_64 aarch64 arm
  
  # qemu-system subpackages, from d/control
  sys_systems = arm mips ppc sparc x86 $(if $(filter ${VENDOR},UBUNTU),s390x,)
 -systems = ${sys_systems} misc
-+systems = x86
++systems = arm x86
  sysarch_arm   = $(filter aarch64 arm,${system_targets})
  sysarch_mips  = $(filter mips mipsel mips64 mips64el,${system_targets})
  sysarch_ppc   = $(filter ppc ppc64,${system_targets})
@@ -415,5 +404,5 @@ index 9d9f18f..d6778c3 100755
  
  b/install-indep-prep.stamp:
 -- 
-2.25.1
+2.30.2
 
