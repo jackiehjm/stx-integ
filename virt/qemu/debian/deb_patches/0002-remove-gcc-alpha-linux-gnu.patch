@@ -1,0 +1,26 @@
+From 82f01401d4197d9e2382551bc1aa8af2b52423d5 Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Fri, 10 Feb 2023 05:37:29 +0000
+Subject: [PATCH] remove gcc-alpha-linux-gnu
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ debian/control | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/debian/control b/debian/control
+index 7cc0fb4..e7d4b32 100644
+--- a/debian/control
++++ b/debian/control
+@@ -113,7 +113,7 @@ Build-Depends-Indep:
+ # gcc-s390x-linux-gnu,
+ # libc6.1-dev-alpha-cross isn't really needed but the code,
+ # for whatever reason, #include's string.h which needs libc6.1-dev
+- gcc-alpha-linux-gnu, libc6.1-dev-alpha-cross,
++# gcc-alpha-linux-gnu, libc6.1-dev-alpha-cross,
+ # skiboot firmware, openbios
+ # gcc-powerpc64-linux-gnu,
+ # openbios
+-- 
+2.30.2
+
