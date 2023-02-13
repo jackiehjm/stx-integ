@@ -386,11 +386,11 @@ openvswitch-testcontroller
 openvswitch-vtep
 
 #qemu
-qemu-block-extra
-qemu-guest-agent
-qemu-system-common
-qemu-system-data
-qemu-system-x86
+#qemu-block-extra
+#qemu-guest-agent
+#qemu-system-common
+#qemu-system-data
+#qemu-system-x86
 
 #runc
 #golang-github-opencontainers-runc-dev  # not used
