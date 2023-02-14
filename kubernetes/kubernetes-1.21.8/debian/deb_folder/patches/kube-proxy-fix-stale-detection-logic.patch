@@ -1,0 +1,229 @@
+From 600a6951a8d00c7bcaaacf72844c9eaed9af3fda Mon Sep 17 00:00:00 2001
+From: Andre Kantek <andrefernandozanella.kantek@windriver.com>
+Date: Mon, 16 Jan 2023 13:31:18 -0300
+Subject: [PATCH] kube-proxy: fix stale detection logic
+
+The logic to detect stale endpoints was not assuming the endpoint
+readiness.
+
+We can have stale entries on UDP services for 2 reasons:
+- an endpoint was receiving traffic and is removed or replaced
+- a service was receiving traffic but not forwarding it, and starts
+to forward it.
+
+Add an e2e test to cover the regression
+
+This patch was ported from upstream commit 909925b4. The file pkg/proxy/iptables/proxier.go had
+some conflicts that would have required porting more and unnecessary unit test code that will
+only be necessary for active sw development.
+
+Current CentOS build system does not provide the kube-proxy image that
+can be built by the kubernetes package. To build the patched kube-proxy
+the following steps were taken (executed in CGTS1):
+1) cd $MY_BUILD_DIR
+2) build-srpms --edit --clean kubernetes-1.21.8
+3) build-srpms --edit kubernetes-1.21.8
+4) cd std/srpm_work/kubernetes-1.21.8/gits/kubernetes.spec/kubernetes-1.21.8/
+5) make clean
+6) make quick-release
+
+The new image will be available in
+./_output/release-images/amd64/kube-proxy.tar
+
+But it will tag with k8s.gcr.io/kube-proxy-amd64:v1.21.8, and we want to set
+as k8s.gcr.io/kube-proxy:v1.21.8-wrs.1
+
+To tag the image the following steps were done (docker environment already available)
+1) docker load < ./_output/release-images/amd64/kube-proxy.tar
+2) docker images | grep kube-proxy
+3) docker image tag [IMAGE ID] k8s.gcr.io/kube-proxy:v1.21.8-wrs.1
+4) docker save k8s.gcr.io/kube-proxy:v1.21.8-wrs.1 -o kube-proxy_v1.21.8-wrs.1.tar
+
+Save kube-proxy_v1.21.8-wrs.1.tar on a safe location
+
+If you have permission to save in admin-2.cumulus.wrs.com
+1) docker login admin-2.cumulus.wrs.com:30093 # use your $USER and passwd
+2) docker image tag [IMAGE ID] admin-2.cumulus.wrs.com:30093/$USER/k8s.gcr.io/kube-proxy:v1.21.8-wrs.1
+3) docker push admin-2.cumulus.wrs.com:30093/$USER/k8s.gcr.io/kube-proxy:v1.21.8-wrs.1
+
+To clean docker
+1) docker image rm k8s.gcr.io/kube-proxy-amd64:v1.21.8
+2) docker image rm k8s.gcr.io/kube-proxy:v1.21.8-wrs.1
+
+---
+ pkg/proxy/endpoints.go        | 33 ++++++++++++++--
+ pkg/proxy/iptables/proxier.go |  3 +-
+ test/e2e/network/conntrack.go | 73 +++++++++++++++++++++++++++++++++++
+ 3 files changed, 105 insertions(+), 4 deletions(-)
+
+diff --git a/pkg/proxy/endpoints.go b/pkg/proxy/endpoints.go
+index 8224f30954d..871285998d4 100644
+--- a/pkg/proxy/endpoints.go
++++ b/pkg/proxy/endpoints.go
+@@ -122,7 +122,9 @@ func (info *BaseEndpointInfo) Port() (int, error) {
+ 
+ // Equal is part of proxy.Endpoint interface.
+ func (info *BaseEndpointInfo) Equal(other Endpoint) bool {
+-	return info.String() == other.String() && info.GetIsLocal() == other.GetIsLocal()
++	return info.String() == other.String() &&
++		info.GetIsLocal() == other.GetIsLocal() &&
++		info.IsReady() == other.IsReady()
+ }
+ 
+ func newBaseEndpointInfo(IP string, port int, isLocal bool, topology map[string]string,
+@@ -517,13 +519,22 @@ func (em EndpointsMap) getLocalReadyEndpointIPs() map[types.NamespacedName]sets.
+ // detectStaleConnections modifies <staleEndpoints> and <staleServices> with detected stale connections. <staleServiceNames>
+ // is used to store stale udp service in order to clear udp conntrack later.
+ func detectStaleConnections(oldEndpointsMap, newEndpointsMap EndpointsMap, staleEndpoints *[]ServiceEndpoint, staleServiceNames *[]ServicePortName) {
++	// Detect stale endpoints: an endpoint can have stale conntrack entries if it was receiving traffic
++	// and then goes unready or changes its IP address.
+ 	for svcPortName, epList := range oldEndpointsMap {
+ 		if svcPortName.Protocol != v1.ProtocolUDP {
+ 			continue
+ 		}
+ 
+ 		for _, ep := range epList {
++			// if the old endpoint wasn't ready is not possible to have stale entries
++			// since there was no traffic sent to it.
++			if !ep.IsReady() {
++				continue
++			}
+ 			stale := true
++			// Check if the endpoint has changed, including if it went from ready to not ready.
++			// If it did change stale entries for the old endpoint has to be cleared.
+ 			for i := range newEndpointsMap[svcPortName] {
+ 				if newEndpointsMap[svcPortName][i].Equal(ep) {
+ 					stale = false
+@@ -537,13 +548,29 @@ func detectStaleConnections(oldEndpointsMap, newEndpointsMap EndpointsMap, stale
+ 		}
+ 	}
+ 
++	// Detect stale services
++	// For udp service, if its backend changes from 0 to non-0 ready endpoints.
++	// There may exist a conntrack entry that could blackhole traffic to the service.
+ 	for svcPortName, epList := range newEndpointsMap {
+ 		if svcPortName.Protocol != v1.ProtocolUDP {
+ 			continue
+ 		}
+ 
+-		// For udp service, if its backend changes from 0 to non-0. There may exist a conntrack entry that could blackhole traffic to the service.
+-		if len(epList) > 0 && len(oldEndpointsMap[svcPortName]) == 0 {
++		epReady := 0
++		for _, ep := range epList {
++			if ep.IsReady() {
++				epReady++
++			}
++		}
++
++		oldEpReady := 0
++		for _, ep := range oldEndpointsMap[svcPortName] {
++			if ep.IsReady() {
++				oldEpReady++
++			}
++		}
++
++		if epReady > 0 && oldEpReady == 0 {
+ 			*staleServiceNames = append(*staleServiceNames, svcPortName)
+ 		}
+ 	}
+diff --git a/pkg/proxy/iptables/proxier.go b/pkg/proxy/iptables/proxier.go
+index e71a5e87307..3ac3fbdf324 100644
+--- a/pkg/proxy/iptables/proxier.go
++++ b/pkg/proxy/iptables/proxier.go
+@@ -164,7 +164,8 @@ func (e *endpointsInfo) Equal(other proxy.Endpoint) bool {
+ 	return e.Endpoint == o.Endpoint &&
+ 		e.IsLocal == o.IsLocal &&
+ 		e.protocol == o.protocol &&
+-		e.chainName == o.chainName
++		e.chainName == o.chainName &&
++		e.Ready == o.Ready
+ }
+ 
+ // Returns the endpoint chain name for a given endpointsInfo.
+diff --git a/test/e2e/network/conntrack.go b/test/e2e/network/conntrack.go
+index 8897406f0b6..c003462aca9 100644
+--- a/test/e2e/network/conntrack.go
++++ b/test/e2e/network/conntrack.go
+@@ -273,6 +273,79 @@ var _ = common.SIGDescribe("Conntrack", func() {
+ 		}
+ 	})
+ 
++	// Regression test for #105657
++	// 1. Create a UDP Service
++	// 2. Client Pod sending traffic to the UDP service
++	// 3. Create a UDP server associated to the Service created in 1. with an init container that sleeps for some time
++	// The init container makes that the server pod is not ready, however, the endpoint slices are created, it is just
++	// that the Endpoint condition Ready is false.
++	// If the kube-proxy conntrack logic doesn't check readiness, it will delete the conntrack entries for the UDP
++	// server when the endpoint slice has been created, however, the iptables rules will not installed until at least
++	// one endpoint is ready. If some traffic arrives to since kube-proxy clear the entries (see the endpoint slice) and
++	// installs the corresponding iptables rules (the endpoint is ready), a conntrack entry will be generated
++	// blackholing subsequent traffic.
++	ginkgo.It("should be able to preserve UDP traffic when initial unready endpoints get ready", func() {
++
++		// Create a ClusterIP service
++		udpJig := e2eservice.NewTestJig(cs, ns, serviceName)
++		ginkgo.By("creating a UDP service " + serviceName + " with type=ClusterIP in " + ns)
++		udpService, err := udpJig.CreateUDPService(func(svc *v1.Service) {
++			svc.Spec.Type = v1.ServiceTypeClusterIP
++			svc.Spec.Ports = []v1.ServicePort{
++				{Port: 80, Name: "udp", Protocol: v1.ProtocolUDP, TargetPort: intstr.FromInt(80)},
++			}
++		})
++		framework.ExpectNoError(err)
++
++		// Create a pod in one node to create the UDP traffic against the ClusterIP service every 5 seconds
++		ginkgo.By("creating a client pod for probing the service " + serviceName)
++		clientPod := e2epod.NewAgnhostPod(ns, podClient, nil, nil, nil)
++		nodeSelection := e2epod.NodeSelection{Name: clientNodeInfo.name}
++		e2epod.SetNodeSelection(&clientPod.Spec, nodeSelection)
++		cmd := fmt.Sprintf(`date; for i in $(seq 1 3000); do echo "$(date) Try: ${i}"; echo hostname | nc -u -w 5 -p %d %s %d; echo; done`, srcPort, udpService.Spec.ClusterIP, udpService.Spec.Ports[0].Port)
++		clientPod.Spec.Containers[0].Command = []string{"/bin/sh", "-c", cmd}
++		clientPod.Spec.Containers[0].Name = podClient
++		fr.PodClient().CreateSync(clientPod)
++
++		// Read the client pod logs
++		logs, err := e2epod.GetPodLogs(cs, ns, podClient, podClient)
++		framework.ExpectNoError(err)
++		framework.Logf("Pod client logs: %s", logs)
++
++		// Add a backend pod to the service in the other node
++		ginkgo.By("creating a backend pod " + podBackend1 + " for the service " + serviceName)
++		serverPod1 := e2epod.NewAgnhostPod(ns, podBackend1, nil, nil, nil, "netexec", fmt.Sprintf("--udp-port=%d", 80))
++		serverPod1.Labels = udpJig.Labels
++		nodeSelection = e2epod.NodeSelection{Name: serverNodeInfo.name}
++		// Add an init container to hold the pod to be ready for 15 seconds
++		serverPod1.Spec.InitContainers = []v1.Container{
++			{
++				Name:    "init",
++				Image:   imageutils.GetE2EImage(imageutils.BusyBox),
++				Command: []string{"/bin/sh", "-c", "echo Pausing start. && sleep 15"},
++			},
++		}
++		e2epod.SetNodeSelection(&serverPod1.Spec, nodeSelection)
++		fr.PodClient().CreateSync(serverPod1)
++
++		// wait until the endpoints are ready
++		validateEndpointsPortsOrFail(cs, ns, serviceName, portsByPodName{podBackend1: {80}})
++
++		// Note that the fact that Endpoints object already exists, does NOT mean
++		// that iptables (or whatever else is used) was already programmed.
++		// Additionally take into account that UDP conntrack entries timeout is
++		// 30 seconds by default.
++		// Based on the above check if the pod receives the traffic.
++		ginkgo.By("checking client pod connected to the backend on Node IP " + serverNodeInfo.nodeIP)
++		if err := wait.PollImmediate(5*time.Second, time.Minute, logContainsFn(podBackend1, podClient)); err != nil {
++			logs, err = e2epod.GetPodLogs(cs, ns, podClient, podClient)
++			framework.ExpectNoError(err)
++			framework.Logf("Pod client logs: %s", logs)
++			framework.Failf("Failed to connect to backend pod")
++		}
++
++	})
++
+ 	// Regression test for #74839, where:
+ 	// Packets considered INVALID by conntrack are now dropped. In particular, this fixes
+ 	// a problem where spurious retransmits in a long-running TCP connection to a service
+-- 
+2.17.1
+

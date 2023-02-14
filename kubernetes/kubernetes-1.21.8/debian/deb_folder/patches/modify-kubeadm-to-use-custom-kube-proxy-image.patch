@@ -1,0 +1,34 @@
+From f94c919182a3ef2faf3f990b60c396e1fdcd4220 Mon Sep 17 00:00:00 2001
+From: Chris Friesen <chris.friesen@windriver.com>
+Date: Thu, 19 Jan 2023 14:10:10 -0600
+Subject: [PATCH] modify kubeadm to use custom kube-proxy image
+
+For K8s 1.21.8 the upstream kube-proxy has a bug that was fixed
+in K8s 1.22.
+
+We have built a custom kube-proxy docker image, but we need to
+modify kubeadm to use the custom image rather than the vanilla
+upstream image.
+
+Signed-off-by: Chris Friesen <chris.friesen@windriver.com>
+---
+ cmd/kubeadm/app/images/images.go | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/cmd/kubeadm/app/images/images.go b/cmd/kubeadm/app/images/images.go
+index 7ada3b75018..34a9195425f 100644
+--- a/cmd/kubeadm/app/images/images.go
++++ b/cmd/kubeadm/app/images/images.go
+@@ -42,6 +42,10 @@ func GetKubernetesImage(image string, cfg *kubeadmapi.ClusterConfiguration) stri
+ 	}
+ 	repoPrefix := cfg.GetControlPlaneImageRepository()
+ 	kubernetesImageTag := kubeadmutil.KubernetesVersionToImageTag(cfg.KubernetesVersion)
++	// Hack for kube-proxy to point to a custom version containing a fix
++	if kubernetesImageTag == "v1.21.8" && image == constants.KubeProxy {
++		kubernetesImageTag = "v1.21.8-wrs.1"
++	}
+ 	return GetGenericImage(repoPrefix, image, kubernetesImageTag)
+ }
+ 
+-- 
+2.24.2

@@ -5,3 +5,5 @@ kubelet-cpumanager-introduce-concept-of-isolated-CPU.patch
 kubeadm-create-platform-pods-with-zero-CPU-resources.patch
 enable-support-for-kubernetes-to-ignore-isolcpus.patch
 Revert-use-subpath-for-coredns-only-for-default-repo.patch
+kube-proxy-fix-stale-detection-logic.patch
+modify-kubeadm-to-use-custom-kube-proxy-image.patch

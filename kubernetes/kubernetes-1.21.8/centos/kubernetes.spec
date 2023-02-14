@@ -63,6 +63,8 @@ Patch7: Revert-use-subpath-for-coredns-only-for-default-repo.patch
 Patch8: Change-log-level-to-Debug.patch
 Patch9: kubernetes-make-isolcpus-allocation-SMT-aware.patch
 Patch10: kubelet-sort-isolcpus-allocation-when-SMT-enabled.patch
+Patch11: kube-proxy-fix-stale-detection-logic.patch
+Patch12: modify-kubeadm-to-use-custom-kube-proxy-image.patch
 
 # It obsoletes cadvisor but needs its source code (literally integrated)
 Obsoletes:      cadvisor
@@ -860,6 +862,8 @@ install in production.
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
+%patch11 -p1
+%patch12 -p1
 
 #src/k8s.io/kubernetes/pkg/util/certificates
 # Patch the code to remove eliptic.P224 support
