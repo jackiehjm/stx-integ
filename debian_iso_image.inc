@@ -19,7 +19,7 @@ centos-debian-compat
 #ceph
 ceph-base
 ceph-common
-ceph-fuse
+#ceph-fuse
 #ceph-grafana-dashboards  # not used
 ceph-mds
 #ceph-mgr-dashboard  # not used
@@ -140,7 +140,7 @@ grub-efi-arm64-bin
 #grub-xen-host  # not used
 #grub-xen  # not used
 grub2-common
-grub2
+#grub2
 
 #grubby
 grubby
@@ -391,7 +391,7 @@ openvswitch-switch
 runc
 
 #shim-unsigned
-shim-helpers-amd64-signed-template
+shim-helpers-arm64-signed-template
 shim-unsigned
 
 #systemd
