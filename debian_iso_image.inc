@@ -19,7 +19,7 @@ centos-debian-compat
 #ceph
 ceph-base
 ceph-common
-#ceph-fuse
+ceph-fuse
 #ceph-grafana-dashboards  # not used
 ceph-mds
 #ceph-mgr-dashboard  # not used
