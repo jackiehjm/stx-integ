@@ -178,7 +178,7 @@ Description: common utilities to mount and interact with a ceph storage cluster
  of common tools that allow one to interact with and administer a Ceph cluster.
 
 Package: ceph-fuse
-Architecture: amd64
+Architecture: linux-any
 Depends:
  python3,
  ${misc:Depends},
