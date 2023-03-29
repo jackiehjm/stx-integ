@@ -8,4 +8,6 @@ dl_path:
     sha256sum: 7514a10ba2d144feb29e09b5e2d4ca506bda023d75aba9387f8681fe2aabee52
 revision:
     dist: $STX_DIST
-    PKG_GITREVCOUNT: true
+    GITREVCOUNT:
+        BASE_SRCREV: a806d997496740f2cec02db121c609e3c743c003
+        SRC_DIR: ${MY_REPO}/stx/integ/networking/openvswitch
