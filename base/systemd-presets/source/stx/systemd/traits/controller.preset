@@ -74,6 +74,9 @@ disable isolcpu_plugin.service
 # kernel
 enable kdump-tools.service
 
+# k8s-kubelet-config
+enable k8s-kubelet-config.service
+
 # k8s-pod-recovery.spec
 enable k8s-pod-recovery.service
 
