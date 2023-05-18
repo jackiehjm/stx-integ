@@ -121,8 +121,6 @@ grub-common
 #grub-efi-ia32-dbg  # not used
 #grub-efi-ia32  # not used
 #grub-efi  # not used
-grub-efi-arm64
-grub-efi-arm64-bin
 #grub-emu-dbg  # not used
 #grub-emu  # not used
 #grub-firmware-qemu  # not used
@@ -130,9 +128,9 @@ grub-efi-arm64-bin
 #grub-ieee1275-dbg  # not used
 #grub-ieee1275  # not used
 #grub-linuxbios  # not used
-#grub-pc-bin
+grub-pc-bin
 #grub-pc-dbg  # not used
-#grub-pc
+grub-pc
 #grub-rescue-pc  # not used
 #grub-theme-starfield  # not used
 #grub-xen-bin  # not used
