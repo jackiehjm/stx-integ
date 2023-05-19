@@ -49,7 +49,7 @@ golang-github-dev/golang-github-opencontainers-specs-dev
 golang-github-dev/golang-github-vishvananda-netlink
 golang-github-dev/golang-github-networkplumbing-go-nft-dev
 grub/grub-efi
-grub/grub2
+#grub/grub2
 grub/grubby
 kubernetes/armada
 kubernetes/armada-helm-toolkit

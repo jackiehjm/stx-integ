@@ -1,2 +1,5 @@
 0001-Make-series-null.patch
 0002-grub-efi-build-packages-related-with-grub-efi.patch
+0003-rules-create-efi-files-for-arm64.patch
+0004-rules-disable-efivar-for-arm64.patch
+0005-control-add-grub-common-and-grub2-common.patch
