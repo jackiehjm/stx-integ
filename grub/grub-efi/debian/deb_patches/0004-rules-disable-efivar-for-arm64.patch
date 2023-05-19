@@ -1,0 +1,29 @@
+From 84f319dd8deaf2bb5d00e697979d4a432faafba8 Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Fri, 19 May 2023 06:22:57 -0400
+Subject: [PATCH] rules: disable efivar for arm64
+
+./obj/grub-efi-arm64/grub-mkimage: error: cannot open `./obj/grub-efi-arm64/grub-core/efivar.mod': No such file or directory.
+./obj/grub-efi-arm64/grub-mkimage: error: cannot open `./obj/grub-efi-arm64/grub-core/efivar.mod': No such file or directory.
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ debian/rules | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/debian/rules b/debian/rules
+index 5697b3d..9fef924 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -361,6 +361,8 @@ ifeq ($(DEB_HOST_ARCH),arm64)
+ OSTREE_CONSOLE := console=ttyAMA0,115200
+ GRUB_TARGET := arm64
+ OBJ_DIR := ./obj/grub-efi-arm64
++GRUB_BUILDIN := boot linux ext2 fat serial part_msdos part_gpt normal efi_gop iso9660 configfile search loadenv test tftp efinet reboot chain regexp
++GRUB_SECURE_BUILDIN := tftp reboot chain password_pbkdf2 pgp gcry_rsa gcry_sha256 gcry_sha512 --pubkey ./boot_pub_key
+ endif
+ 
+ install/grub-efi-amd64 install/grub-efi-ia64 install/grub-efi-arm install/grub-efi-arm64 install/grub-ieee1275 install/grub-coreboot install/grub-emu install/grub-uboot install/grub-xen install/grub-yeeloong:
+-- 
+2.30.2
+

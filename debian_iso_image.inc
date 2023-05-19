@@ -128,9 +128,9 @@ grub-common
 #grub-ieee1275-dbg  # not used
 #grub-ieee1275  # not used
 #grub-linuxbios  # not used
-grub-pc-bin
+#grub-pc-bin
 #grub-pc-dbg  # not used
-grub-pc
+#grub-pc
 #grub-rescue-pc  # not used
 #grub-theme-starfield  # not used
 #grub-xen-bin  # not used
