@@ -1,0 +1,100 @@
+From 124f2a42ce7d1e5357ddde2e5a420e286bd983fa Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Tue, 23 May 2023 02:47:26 -0400
+Subject: [PATCH] rules: fix build for grub-efi-arm64
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ debian/rules | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 69 insertions(+)
+
+diff --git a/debian/rules b/debian/rules
+index be8f870..9dbb1ce 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -350,6 +350,27 @@ install/grub-none:
+ 	# files.
+ 	mkdir -p debian/tmp-$(package)/usr/share/locale
+ 
++D_PACKAGE := debian/grub-efi-$(DEB_HOST_ARCH)/
++EFI_BOOT_PATH := /boot/efi/EFI/BOOT
++DISTRO_NAME := StarlingX
++DISTRO_VERSION :=
++OSTREE_GRUB_PW_FILE := ./boot_cfg_pw
++OSTREE_GRUB_USER := root
++OSTREE_CONSOLE := console=ttyS0,115200
++GRUB_BUILDIN := boot linux ext2 fat serial part_msdos part_gpt normal efi_gop iso9660 configfile search loadenv test tftp efinet reboot chain regexp efivar
++GRUB_SECURE_BUILDIN := tftp reboot chain efivar password_pbkdf2 pgp gcry_rsa gcry_sha256 gcry_sha512 --pubkey ./boot_pub_key
++GRUB_TARGET := x86_64
++GRUB_PREFIX_DIR := /EFI/BOOT
++OBJ_DIR := ./obj/grub-efi-amd64
++
++ifeq ($(DEB_HOST_ARCH),arm64)
++OSTREE_CONSOLE := console=ttyAMA0,115200
++GRUB_TARGET := arm64
++OBJ_DIR := ./obj/grub-efi-arm64
++GRUB_BUILDIN := boot linux ext2 fat serial part_msdos part_gpt normal efi_gop iso9660 configfile search loadenv test tftp efinet reboot chain regexp
++GRUB_SECURE_BUILDIN := tftp reboot chain password_pbkdf2 pgp gcry_rsa gcry_sha256 gcry_sha512 --pubkey ./boot_pub_key
++endif
++
+ install/grub-pc install/grub-efi-ia32 install/grub-efi-amd64 install/grub-efi-ia64 install/grub-efi-arm install/grub-efi-arm64 install/grub-ieee1275 install/grub-coreboot install/grub-emu install/grub-uboot install/grub-xen install/grub-yeeloong:
+ 	set -e ; \
+ 	if [ "$@" = "install/grub-xen" ] ; then \
+@@ -470,6 +491,54 @@ install/grub-pc install/grub-efi-ia32 install/grub-efi-amd64 install/grub-efi-ia
+ 	# files.
+ 	mkdir -p debian/tmp-$(package)/usr/share/locale
+ 
++	if [ "$@" = "install/grub-efi-amd64" ] ; then \
++		install -d $(D_PACKAGE)/$(EFI_BOOT_PATH) ; \
++		install -m 0600 ./grub-runtime.cfg $(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg ; \
++		sed -i "s#%DISTRO_NAME%#$(DISTRO_NAME)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		sed -i "s#%DISTRO_VERSION%#$(DISTRO_VERSION)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		echo -n "password_pbkdf2 $(OSTREE_GRUB_USER) " > ./pw ; \
++		cat "$(OSTREE_GRUB_PW_FILE)" >> ./pw ; \
++		sed -i "s#%OSTREE_GRUB_USER%#$(OSTREE_GRUB_USER)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		str_pw=`cat ./pw` ; \
++		sed -i "s#%OSTREE_GRUB_PW%#$${str_pw}#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		sed -i "s#%OSTREE_CONSOLE%#$(OSTREE_CONSOLE)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		$(OBJ_DIR)/grub-mkimage -c ./cfg_nosecure -p "$(GRUB_PREFIX_DIR)" -d "$(OBJ_DIR)/grub-core" \
++			-O "$(GRUB_TARGET)-efi" -o "./bootx64-nosig.efi" \
++			$(GRUB_BUILDIN) ; \
++		install -m 0644 ./bootx64-nosig.efi $(D_PACKAGE)$(EFI_BOOT_PATH)/bootx64-nosig.efi ; \
++		$(OBJ_DIR)/grub-editenv "$(D_PACKAGE)$(EFI_BOOT_PATH)/grubenv" create ; \
++		install -d $(D_PACKAGE)$(EFI_BOOT_PATH)/$(GRUB_TARGET)-efi ; \
++		$(OBJ_DIR)/grub-mkimage -c ./cfg -p "$(GRUB_PREFIX_DIR)" -d "$(OBJ_DIR)/grub-core" \
++			-O "$(GRUB_TARGET)-efi" -o "./grubx64.efi" \
++			$(GRUB_BUILDIN) $(GRUB_SECURE_BUILDIN) ; \
++		install -m 0644 ./grubx64.efi $(D_PACKAGE)$(EFI_BOOT_PATH)/grubx64.efi ; \
++		install -m 0644 $(OBJ_DIR)/grub-core/*.mod $(D_PACKAGE)$(EFI_BOOT_PATH)/$(GRUB_TARGET)-efi ; \
++	fi
++
++	if [ "$@" = "install/grub-efi-arm64" ] ; then \
++		install -d $(D_PACKAGE)/$(EFI_BOOT_PATH) ; \
++		install -m 0600 ./grub-runtime.cfg $(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg ; \
++		sed -i "s#%DISTRO_NAME%#$(DISTRO_NAME)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		sed -i "s#%DISTRO_VERSION%#$(DISTRO_VERSION)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		echo -n "password_pbkdf2 $(OSTREE_GRUB_USER) " > ./pw ; \
++		cat "$(OSTREE_GRUB_PW_FILE)" >> ./pw ; \
++		sed -i "s#%OSTREE_GRUB_USER%#$(OSTREE_GRUB_USER)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		str_pw=`cat ./pw` ; \
++		sed -i "s#%OSTREE_GRUB_PW%#$${str_pw}#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		sed -i "s#%OSTREE_CONSOLE%#$(OSTREE_CONSOLE)#g" "$(D_PACKAGE)$(EFI_BOOT_PATH)/grub.cfg" ; \
++		$(OBJ_DIR)/grub-mkimage -c ./cfg_nosecure -p "$(GRUB_PREFIX_DIR)" -d "$(OBJ_DIR)/grub-core" \
++			-O "$(GRUB_TARGET)-efi" -o "./bootaa64-nosig.efi" \
++			$(GRUB_BUILDIN) ; \
++		install -m 0644 ./bootaa64-nosig.efi $(D_PACKAGE)$(EFI_BOOT_PATH)/bootaa64-nosig.efi ; \
++		$(OBJ_DIR)/grub-editenv "$(D_PACKAGE)$(EFI_BOOT_PATH)/grubenv" create ; \
++		install -d $(D_PACKAGE)$(EFI_BOOT_PATH)/$(GRUB_TARGET)-efi ; \
++		$(OBJ_DIR)/grub-mkimage -c ./cfg -p "$(GRUB_PREFIX_DIR)" -d "$(OBJ_DIR)/grub-core" \
++			-O "$(GRUB_TARGET)-efi" -o "./grubaa64.efi" \
++			$(GRUB_BUILDIN) $(GRUB_SECURE_BUILDIN) ; \
++		install -m 0644 ./grubaa64.efi $(D_PACKAGE)$(EFI_BOOT_PATH)/grubaa64.efi ; \
++		install -m 0644 $(OBJ_DIR)/grub-core/*.mod $(D_PACKAGE)$(EFI_BOOT_PATH)/$(GRUB_TARGET)-efi ; \
++	fi
++
+ common_subst = \
+ 	if [ -e debian/grub-common.$(1) ]; then \
+ 		sed 's/@COMMON_PLATFORM@/$(COMMON_PLATFORM)/g' \
+-- 
+2.30.2
+

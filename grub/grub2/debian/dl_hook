@@ -38,3 +38,4 @@ then
     echo "tar failed: debian folder!"
     exit 1
 fi
+cp ../local_debian/files/* ./
