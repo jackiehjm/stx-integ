@@ -24,7 +24,7 @@ index c0fecb9a6..d8cef89d5 100644
  
  # Used to populate variables in version package.
 -VERSION=$(shell git describe --match 'v[0-9]*' --dirty='.m' --always)
-+VERSION=v1.4.11
++VERSION=v1.4.13~ds1-1~deb11u4
  REVISION=$(shell git rev-parse HEAD)$(shell if ! git diff --no-ext-diff --quiet --exit-code; then echo .m; fi)
  PACKAGE=github.com/containerd/containerd
  SHIM_CGO_ENABLED ?= 0

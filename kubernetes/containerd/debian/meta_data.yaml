@@ -1,11 +1,10 @@
 ---
 debname: containerd
-debver: 1.4.12~ds1-1
+debver: 1.4.13~ds1-1~deb11u4
 dl_path:
-  name: containerd-debian-1.4.12_ds1-1.tar.gz
-  url: https://salsa.debian.org/go-team/packages/containerd/-/archive/debian/1.4.12_ds1-1_deb11u1/containerd-debian-1.4.12_ds1-1_deb11u1.tar.gz
-  md5sum: 12565b0d12ce878b6315f049e48113cd
-  sha256sum: 00199134fed422a3a8041d7a9f8dd782811e7792ee2e7c298351f026c04b99db
+  name: containerd-debian-1.4.13_ds1-1_deb11u4.tar.gz
+  url: https://salsa.debian.org/go-team/packages/containerd/-/archive/debian/1.4.13_ds1-1_deb11u4/containerd-debian-1.4.13_ds1-1_deb11u4.tar.gz
+  sha256sum: 082d2e7b2416319f509716c3f1772c3d612cb35091331f3daf9c9c5aec80436e
 revision:
   dist: $STX_DIST
   PKG_GITREVCOUNT: true
