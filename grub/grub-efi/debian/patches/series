@@ -1,1 +1,4 @@
 0001-grub2-add-tboot.patch
+0002-grub2-checking-if-loop-devices-are-available.patch
+0003-Make-UEFI-watchdog-behaviour-configurable.patch
+0020-init.c-fix-build-for-arm64.patch
