@@ -112,8 +112,9 @@ libfacter3.14.12
 #grub-efi-amd64-bin  # not used
 #grub-efi-amd64-dbg  # not used
 #grub-efi-amd64-signed-template  # not used
-grub-efi-amd64
+#grub-efi-amd64
 #grub-efi  # not used
+grub-efi-arm64
 
 #grub2
 grub-common
