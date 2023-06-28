@@ -5,6 +5,10 @@ dl_path:
   name: containerd-1.6.21-linux-amd64.tar.gz
   url: https://github.com/containerd/containerd/releases/download/v1.6.21/containerd-1.6.21-linux-amd64.tar.gz
   sha256sum: 04dcc1b99368492caee758583e531392683268197e58156888a3cea2941117b6
+dl_path_arm64:
+  name: containerd-1.6.21-linux-arm64.tar.gz
+  url: https://github.com/containerd/containerd/releases/download/v1.6.21/containerd-1.6.21-linux-arm64.tar.gz
+  sha256sum: d713d8fbec491705ffe8c33ecc9051a904f6eedc92574928e1d33616f291c583
 src_files:
   - debian/files/config.toml
   - debian/files/containerd.service
