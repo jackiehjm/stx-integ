@@ -7,6 +7,9 @@ drbd-utils
 parted
 kubectl-cert-manager
 lvm2
+#puppet-hash2stuff
+puppet-hash2stuff
+
 trident-installer
 iputils-arping
 iputils-ping
