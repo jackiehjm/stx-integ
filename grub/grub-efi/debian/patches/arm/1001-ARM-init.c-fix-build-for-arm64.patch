@@ -1,0 +1,34 @@
+From 46e54aec0b0f6eda1bed195dd63f79e02f8b020a Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Thu, 25 May 2023 22:54:29 -0400
+Subject: [PATCH] init.c: fix build for arm64
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ grub-core/kern/efi/init.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/grub-core/kern/efi/init.c b/grub-core/kern/efi/init.c
+index 4a88397..0ddadaa 100644
+--- a/grub-core/kern/efi/init.c
++++ b/grub-core/kern/efi/init.c
+@@ -94,6 +94,7 @@ grub_cmd_efi_watchdog (grub_command_t cmd  __attribute__ ((unused)),
+     grub_efi_status_t status;
+     grub_efi_uintn_t timeout;
+     grub_efi_uint64_t code;
++    grub_efi_char16_t *str_grub = (grub_efi_char16_t *)L"GRUB";
+ 
+     if (argc < 1)
+        return grub_error (GRUB_ERR_BAD_ARGUMENT,
+@@ -137,7 +138,7 @@ grub_cmd_efi_watchdog (grub_command_t cmd  __attribute__ ((unused)),
+     }
+ 
+     status = efi_call_4 (grub_efi_system_table->boot_services->set_watchdog_timer,
+-                        timeout, code, sizeof(L"GRUB"), L"GRUB");
++                        timeout, code, sizeof(str_grub), str_grub);
+ 
+     if (status != GRUB_EFI_SUCCESS)
+        return grub_error (GRUB_ERR_BUG,
+-- 
+2.30.2
+
