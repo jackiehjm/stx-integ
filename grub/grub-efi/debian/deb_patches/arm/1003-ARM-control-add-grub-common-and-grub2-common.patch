@@ -1,0 +1,111 @@
+From 05ca2538d90be2c9789e5076770457039f6f4ab0 Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Tue, 23 May 2023 23:28:14 -0400
+Subject: [PATCH] control: add grub-common and grub2-common
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ debian/control                | 33 +++++++++++++++++++++++++++++++++
+ debian/grub-common.install.in |  2 --
+ debian/rules                  |  7 ++++---
+ 3 files changed, 37 insertions(+), 5 deletions(-)
+
+diff --git a/debian/control b/debian/control
+index caea0c3..7b4f933 100644
+--- a/debian/control
++++ b/debian/control
+@@ -50,6 +50,39 @@ Description: GRand Unified Bootloader, version 2 (dummy package)
+  This is a dummy package that depends on the grub-efi-$ARCH package most likely
+  to be appropriate for each architecture.
+ 
++Package: grub-common
++Architecture: any
++Depends: ${shlibs:Depends}, ${misc:Depends}, gettext-base, ${lsb-base-depends}
++Replaces: grub-pc (<< 2.00-4), grub-ieee1275 (<< 2.00-4), grub-efi (<< 1.99-1), grub-coreboot (<< 2.00-4), grub-linuxbios (<< 1.96+20080831-1), grub-efi-ia32 (<< 2.00-4), grub-efi-amd64 (<< 2.00-4), grub-efi-ia64 (<< 2.00-4), grub-yeeloong (<< 2.00-4), init-select
++Recommends: os-prober (>= 1.33)
++Suggests: multiboot-doc, grub-emu [any-i386 any-amd64 any-powerpc], mtools [any-i386 any-amd64 any-ia64 any-arm any-arm64], xorriso (>= 0.5.6.pl00), desktop-base (>= 4.0.6), console-setup
++Conflicts: init-select
++# mdadm: See bugs #435983 and #455746
++Breaks: mdadm (<< 2.6.7-2), lupin-support (<< 0.55), friendly-recovery (<< 0.2.13), apport (<< 2.1.1)
++Multi-Arch: foreign
++Description: GRand Unified Bootloader (common files)
++ This package contains common files shared by the distinct flavours of GRUB.
++ It is shared between GRUB Legacy and GRUB 2, although a number of files
++ specific to GRUB 2 are here as long as they do not break GRUB Legacy.
++ .
++ grub-mkrescue needs the suggested packages mtools (for UEFI targets) and
++ xorriso.
++
++Package: grub2-common
++# Not Architecture: any because this package contains some things which are
++# only built when there is a real platform (e.g. grub-install), and the rest
++# of the package is not very useful in a utilities-only build.
++Architecture: any-i386 any-amd64 any-powerpc any-ppc64 any-ppc64el any-sparc any-sparc64 any-mipsel any-ia64 any-arm any-arm64
++Depends: grub-common (= ${binary:Version}), dpkg (>= 1.15.4) | install-info, ${shlibs:Depends}, ${misc:Depends}
++Replaces: grub, grub-legacy, ${legacy-doc-br}, grub-common (<< 1.99-1), grub-pc (<< 2.02+dfsg1-7), grub-coreboot (<< 2.02+dfsg1-7), grub-efi-ia32 (<< 2.02+dfsg1-7), grub-efi-amd64 (<< 2.02+dfsg1-7), grub-efi-ia64 (<< 2.02+dfsg1-7), grub-efi-arm (<< 2.02+dfsg1-7), grub-efi-arm64 (<< 2.02+dfsg1-7), grub-ieee1275 (<< 2.02+dfsg1-7), grub-uboot (<< 2.02+dfsg1-7), grub-xen (<< 2.02+dfsg1-7), grub-yeeloong (<< 2.02+dfsg1-7), grub-cloud-amd64 (<< 0.0.4)
++Conflicts: grub-legacy
++Breaks: grub (<< 0.97-54), ${legacy-doc-br}, shim (<< 0.9+1474479173.6c180c6-0ubuntu1~), grub-pc (<< 2.02+dfsg1-7), grub-coreboot (<< 2.02+dfsg1-7), grub-efi-ia32 (<< 2.02+dfsg1-7), grub-efi-amd64 (<< 2.02+dfsg1-7), grub-efi-ia64 (<< 2.02+dfsg1-7), grub-efi-arm (<< 2.02+dfsg1-7), grub-efi-arm64 (<< 2.02+dfsg1-7), grub-ieee1275 (<< 2.02+dfsg1-7), grub-uboot (<< 2.02+dfsg1-7), grub-xen (<< 2.02+dfsg1-7), grub-yeeloong (<< 2.02+dfsg1-7), grub-cloud-amd64 (<< 0.0.4)
++Multi-Arch: foreign
++Description: GRand Unified Bootloader (common files for version 2)
++ This package contains common files shared by the distinct flavours of GRUB.
++ The files in this package are specific to GRUB 2, and would break GRUB
++ Legacy if installed on the same system.
++
+ Package: grub-efi-amd64-bin
+ Architecture: i386 kopensolaris-i386 any-amd64
+ Depends: ${shlibs:Depends}, ${misc:Depends}, grub-common
+diff --git a/debian/grub-common.install.in b/debian/grub-common.install.in
+index 420a61e..cc6ae6d 100644
+--- a/debian/grub-common.install.in
++++ b/debian/grub-common.install.in
+@@ -22,7 +22,6 @@ usr/bin/grub-script-check
+ usr/bin/grub-syslinux2cfg
+ usr/sbin/grub-macbless
+ usr/sbin/grub-mkconfig
+-usr/sbin/grub-mkdevicemap
+ usr/sbin/grub-probe
+ usr/share/grub/*.h
+ usr/share/grub/*.pf2
+@@ -47,5 +46,4 @@ usr/share/man/man1/grub-script-check.1
+ usr/share/man/man1/grub-syslinux2cfg.1
+ usr/share/man/man8/grub-macbless.8
+ usr/share/man/man8/grub-mkconfig.8
+-usr/share/man/man8/grub-mkdevicemap.8
+ usr/share/man/man8/grub-probe.8
+diff --git a/debian/rules b/debian/rules
+index 9fef924..b3d2897 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -167,10 +167,10 @@ override_dh_autoreconf:
+ 		PYTHON=python3 \
+ 		dh_autoreconf -- ./autogen.sh
+ 
+-debian/stamps/configure-grub-common:
++debian/stamps/configure-grub-common: debian/stamps/configure-grub-$(COMMON_PLATFORM)
+ 	touch $@
+ 
+-debian/stamps/build-grub-common:
++debian/stamps/build-grub-common: debian/stamps/build-grub-$(COMMON_PLATFORM)
+ 	touch $@
+ 
+ debian/stamps/configure-grub-none debian/stamps/configure-grub-pc debian/stamps/configure-grub-ieee1275 debian/stamps/configure-grub-coreboot debian/stamps/configure-grub-emu debian/stamps/configure-grub-uboot debian/stamps/configure-grub-yeeloong:
+@@ -208,7 +208,7 @@ debian/stamps/build-grub-none debian/stamps/build-grub-efi-ia64 debian/stamps/bu
+ 	dh_auto_build
+ 	touch $@
+ 
+-debian/stamps/build-grub-efi-amd64 debian/stamps/build-grub-efi-arm64: debian/stamps/build-%: debian/stamps/configure-%
++debian/stamps/build-grub-efi-amd64 debian/stamps/build-grub-efi-arm64: debian/stamps/build-%: debian/stamps/configure-% debian/stamps/build-grub-$(COMMON_PLATFORM)
+ 	dh_auto_build
+ 	grub_dir=`mktemp -d` ; \
+ 	sed -e "s/@DEB_VERSION@/$(deb_version)/g" \
+@@ -564,6 +564,7 @@ override_dh_install:
+ ifneq (,$(NON_PLATFORM_PACKAGES))
+ 	dh_install $(patsubst %,-p%,$(NON_PLATFORM_PACKAGES))
+ endif
++	dh_install $(patsubst %,-p%,$(COMMON_PLATFORM_PACKAGES)) --sourcedir=debian/tmp-grub-$(COMMON_PLATFORM)
+ 	rm -f debian/grub2-common/usr/share/info/dir*
+ 	rm -f debian/grub-theme-starfield/usr/share/grub/themes/starfield/COPYING.CC-BY-SA-3.0
+ ifneq (,$(PLATFORM_PACKAGES))
+-- 
+2.30.2
+
