@@ -1,0 +1,9 @@
+0001-grub2-add-tboot.patch
+0002-grub2-checking-if-loop-devices-are-available.patch
+0003-Make-UEFI-watchdog-behaviour-configurable.patch
+0004-correct-grub_errno.patch
+0005-grub-verify-Add-skip_check_cfg-variable.patch
+0006-pe32.h-add-header-structures-for-TE-and-DOS-executab.patch
+0007-shim-add-needed-data-structures.patch
+0008-efi-chainloader-implement-an-UEFI-Exit-service.patch
+0035-ARM-init.c-fix-build-for-arm64.patch
