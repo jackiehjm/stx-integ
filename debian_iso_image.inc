@@ -14,3 +14,7 @@ trident-installer
 iputils-arping
 iputils-ping
 iputils-tracepath
+
+#tzdata
+tzdata
+
