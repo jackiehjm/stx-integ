@@ -27,6 +27,7 @@ import (
 	"isolcpu_plugin/kubernetes/pkg/kubelet/cm/cpuset"
 	"github.com/pkg/errors"
         "io/ioutil"
+	"os"
 	"strconv"
 	"strings"
         "time"
@@ -111,13 +112,18 @@ func (dp *devicePlugin) scan() (dpapi.DeviceTree, error) {
                         cpustr := strconv.Itoa(cpu)
 			numaNode, _ := dp.getCPUNode(cpu)
 			devPath := path.Join("/dev/cpu", cpustr, "cpuid")
-			debug.Printf("Adding %s to isolcpus", devPath)
-		        var nodes []pluginapi.DeviceSpec
-			nodes = append(nodes, pluginapi.DeviceSpec{
-				HostPath:      devPath,
-				ContainerPath: devPath,
-				Permissions:   "r",
-			})
+			var nodes []pluginapi.DeviceSpec
+			if _, err := os.Stat(devPath); os.IsNotExist(err) {
+				debug.Printf("Dev path %s doesn't exist", devPath)
+			} else {
+				debug.Printf("Adding %s to isolcpus", devPath)
+				nodes = append(nodes, pluginapi.DeviceSpec{
+					HostPath:      devPath,
+					ContainerPath: devPath,
+					Permissions:   "r",
+				})
+
+			}
 		        devTree.AddDevice(deviceType, cpustr, dpapi.DeviceInfo{
 			    State: pluginapi.Healthy, Nodes: nodes, NumaNode: numaNode,
 		        })
