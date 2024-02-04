@@ -8,3 +8,4 @@
 0008-sysoff-Change-log-level-of-ioctl-error-messages.patch
 0009-sysoff-Retry-on-EBUSY-when-probing-supported-ioctls.patch
 0010-phc2sys-Don-t-exit-when-reading-of-PHC-fails-with-EB.patch
+0011-ts2phc-Fix-offset-for-NMEA-delays-over-0.5-seconds.patch
